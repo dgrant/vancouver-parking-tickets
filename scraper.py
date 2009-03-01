@@ -2,6 +2,7 @@ from mechanize import Browser
 from BeautifulSoup import BeautifulSoup
 from lxml import html as HTML
 import datetime
+import logging
 import pprint
 import re
 import time
@@ -28,17 +29,23 @@ class Scraper(object):
         for div in soup.findAll('div'):
             if div.has_key('id') and div['id'] == 'cxkg':
                 self.appkey = div.findAll('a')[0]['href'].split('AppKey=')[1].split('&')[0]
+                logging.info('Got app key=%s', self.appkey)
                 break
 
     def ScrapeTickets(self, page):
         assert len(self.appkey) > 10
         url = ENDPOINT % (self.appkey, page)
+        logging.debug('Opening url: %s', url)
+        startTime = time.time()
         self.b.open(url)
+        logging.info('Loaded page in %d seconds', time.time() - startTime)
+
+        logging.info('Starting to scrape tickets from page %d', page)
 
         doc = HTML.fromstring(self.b.response().read(), self.b.geturl())
 
         tickets = []
-        fields = ["Date", "Time", "LicensePlate", "Make", "StreetNumber", "Street", "Offence", "RecordId"]
+        fields = ["date", "Time", "plate", "make", "street_num", "street_name", "offence", "record_id"]
         for tr in doc.xpath("//table[1]/tr[@class='cbResultSetEvenRow'] | //table[1]/tr[@class='cbResultSetOddRow']"):
             values = [td.text for td in tr.getchildren()[:7]]
             td_details=tr.getchildren()[7]
@@ -48,19 +55,12 @@ class Scraper(object):
             ticket = Ticket(zip(fields, values))
             ticket.CleanUpRawTicket()
             tickets.append(ticket)
+        logging.info('Finished scraping %d tickets from page %d', len(tickets), page)
         return tickets
 
 class Ticket(dict):
     def CleanUpRawTicket(self):
-        print self
-        date = datetime.datetime.strptime(self['Date'] + " " + self['Time'], "%a, %b %d '%y %H%M")
+        date = datetime.datetime.strptime(self['date'] + " " + self['Time'], "%a, %b %d '%y %H%M")
         assert 2004 <= date.year < 2009
-        self['Date'] = date
+        self['date'] = date
         del self['Time']
-
-s = Scraper()
-for i in xrange(1,54380):
-    start_time = time.time()
-    tickets = s.ScrapeTickets(int(sys.argv[1]))
-    pprint.pprint(tickets)
-    print "took", time.time() - start_time, "seconds"
