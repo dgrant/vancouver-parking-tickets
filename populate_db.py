@@ -34,7 +34,9 @@ if __name__ == '__main__':
         import scraper
 
         s = scraper.Scraper()
-        pages = range(1, 54381)
+        MAX = 54381
+        START = int(sys.argv[1])
+        pages = range(START, START+5000)
         for page in pages:
             logging.debug("Fetching page %d", page)
             start_time = time.time()
