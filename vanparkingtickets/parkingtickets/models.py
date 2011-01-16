@@ -49,6 +49,6 @@ class Make(models.Model):
         return unicode(self.name)
 
 
-#admin.site.register(Offence)
-#admin.site.register(Ticket, TicketAdmin)
-#admin.site.register(Make)
+admin.site.register(Offence)
+admin.site.register(Ticket, TicketAdmin)
+admin.site.register(Make)

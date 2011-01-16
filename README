@@ -1,0 +1,9 @@
+1. Create a mysql database called parkingtickets with username parkingtickets that has full access to the database. Default password is django.
+
+2. Import the database which can be found here: http://dl.dropbox.com/u/887695/parkingtickets.sql.gz
+
+3. If you want to browse the database using django, you'll need to have at least django 1.2.x installed (greater versions untested)
+
+4. cd to vanparkingtickets directory and run ./manage.py syncdb
+
+5. Run ./manage.py runserver and go to http://localhost:8080
